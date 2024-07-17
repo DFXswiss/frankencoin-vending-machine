@@ -1,2 +1,3 @@
-# frankencoin-vending-machine
-Frankencoin vending machine
+# FrankencoinPay Vending Machine
+
+FrankencoinPay POS code for MDB vending machines
