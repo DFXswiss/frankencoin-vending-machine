@@ -28,7 +28,8 @@ class App {
     this.machine.onMessage.subscribe(async (msg: Message) => {
       switch (msg.type) {
         case MessageType.ENABLED: {
-          await this.machine.setCredit(10);
+          await Util.sleep(2);
+          await this.machine.setCredit(10); //give credit 10.00
           break;
         }
 
@@ -40,9 +41,9 @@ class App {
           let { payment } = await this.api.createPayment(
             linkId,
             msg.payload.price,
-            'CHF',
+            'CHF', //in a variable
             undefined,
-            Util.minutesAfter(10),
+            Util.secondsAfter(45), //Abbruch Zahlung
           ); // TODO: machine timeout?
           if (!payment) return;
 
@@ -58,11 +59,11 @@ class App {
           if (payment?.id === paymentId) {
             switch (payment.status) {
               case PaymentLinkPaymentStatus.COMPLETED:
-                // TODO: accept vend
+                await this.machine.acceptVend(msg.payload.price);
                 break;
 
               case PaymentLinkPaymentStatus.EXPIRED:
-                // TODO: cancel vend
+                await this.machine.stopVending() //Guthaben zurückerstatten
                 break;
             }
           }
@@ -84,8 +85,8 @@ class App {
     await this.machine.enable();
 
     // wait forever
-    for (;;) {
-      Util.sleep(1);
+    for (; ;) {
+      await Util.sleep(1);
     }
   }
 }

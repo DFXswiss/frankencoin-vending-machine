@@ -76,6 +76,16 @@ export class Util {
     return this.minutesAfter(-minutes, from);
   }
 
+  static secondsAfter(seconds: number, from?: Date): Date {
+    const date = from ? new Date(from) : new Date();
+    date.setSeconds(date.getSeconds() + seconds);
+    return date;
+  }
+
+  static secondsBefore(seconds: number, from?: Date): Date {
+    return this.secondsAfter(-seconds, from);
+  }
+
   // --- MATH UTIL --- //
   static round(number: number, decimals: number): number {
     return Math.round(number * Math.pow(10, decimals)) / Math.pow(10, decimals);
