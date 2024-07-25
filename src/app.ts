@@ -18,7 +18,7 @@ class App {
   }
 
   async run() {
-    const linkId = Config.deviceId;
+    const linkId = Config.pos.name;
 
     // create the link
     const link = await this.api.getPaymentLink(linkId).catch(() => undefined);
@@ -26,58 +26,58 @@ class App {
 
     // listen to messages
     this.machine.onMessage.subscribe(async (msg: Message) => {
-      switch (msg.type) {
-        case MessageType.ENABLED: {
-          await Util.sleep(2);
-          await this.machine.setCredit(10); //give credit 10.00
-          break;
-        }
-
-        case MessageType.PRODUCT: {
-          await this.api.cancelPayment(linkId).catch(() => {
-            // ignore error
-          });
-
-          let { payment } = await this.api.createPayment(
-            linkId,
-            msg.payload.price,
-            'CHF', //in a variable
-            undefined,
-            Util.secondsAfter(45), //Abbruch Zahlung
-          ); // TODO: machine timeout?
-          if (!payment) return;
-
-          const paymentId = payment.id;
-
-          // poll the payment
-          while (payment?.status === PaymentLinkPaymentStatus.PENDING && payment.id === paymentId) {
-            Util.sleep(1);
-
-            ({ payment } = await this.api.getPaymentLink(linkId));
+      try {
+        switch (msg.type) {
+          case MessageType.ENABLED: {
+            await Util.sleep(2);
+            await this.machine.setCredit(10); //give credit 10.00
+            break;
           }
 
-          if (payment?.id === paymentId) {
-            switch (payment.status) {
-              case PaymentLinkPaymentStatus.COMPLETED:
-                await this.machine.acceptVend(msg.payload.price);
-                break;
+          case MessageType.PRODUCT: {
+            await this.api.cancelPayment(linkId).catch(() => {
+              // ignore error
+            });
 
-              case PaymentLinkPaymentStatus.EXPIRED:
-                await this.machine.stopVending() //Guthaben zurückerstatten
-                break;
+            let { payment } = await this.api.createPayment(
+              linkId,
+              msg.payload.price,
+              Config.pos.currency,
+              undefined,
+              Util.secondsAfter(Config.pos.timeout),
+            );
+            if (!payment) return;
+
+            const paymentId = payment.id;
+
+            // poll the payment
+            while (payment?.status === PaymentLinkPaymentStatus.PENDING && payment.id === paymentId) {
+              await Util.sleep(1);
+
+              ({ payment } = await this.api.getPaymentLink(linkId));
             }
+
+            if (payment?.id === paymentId) {
+              switch (payment.status) {
+                case PaymentLinkPaymentStatus.COMPLETED:
+                  await this.machine.acceptVend(msg.payload.price);
+                  break;
+
+                case PaymentLinkPaymentStatus.EXPIRED:
+                  await this.machine.stopVending(); //Guthaben zurückerstatten
+                  break;
+              }
+            }
+            break;
           }
-          break;
-        }
 
-        // // cancel the payment
-        // link = await this.api.cancelPayment(link.id);
-        // this.logger.info('Link:', link);
-
-        case MessageType.ERROR: {
-          this.logger.error(`Received error from machine: ${msg.payload}`);
-          break;
+          case MessageType.ERROR: {
+            this.logger.error(`Received error from machine: ${msg.payload}`);
+            break;
+          }
         }
+      } catch (e) {
+        this.logger.error('Failed to handle message:', e);
       }
     });
 
@@ -85,7 +85,7 @@ class App {
     await this.machine.enable();
 
     // wait forever
-    for (; ;) {
+    for (;;) {
       await Util.sleep(1);
     }
   }

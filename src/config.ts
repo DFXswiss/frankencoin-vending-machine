@@ -3,6 +3,11 @@ import { hostname } from 'os';
 
 class ConfigClass {
   deviceId = hostname();
+  pos = {
+    name: process.env.POS_NAME ?? 'default',
+    timeout: +(process.env.POS_TIMEOUT_S ?? 60),
+    currency: process.env.POS_CURRENCY ?? 'CHF',
+  };
 
   logger = {
     printConsole: true,

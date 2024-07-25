@@ -46,8 +46,6 @@ export class VendingMachine {
     this.parser.on('data', (d) => this.onRead(d));
   }
 
-  isEnabled: boolean = false;
-
   readonly onMessage: Observable<Message> = this.$message.asObservable();
 
   async enable(): Promise<void> {
