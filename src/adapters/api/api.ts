@@ -30,12 +30,8 @@ export class Api {
   }
 
   // --- PAYMENT LINKS --- //
-  async getAllPaymentLinks(): Promise<PaymentLink[]> {
-    return this.callApi('paymentLink');
-  }
-
-  async getPaymentLink(id: number): Promise<PaymentLink> {
-    return this.callApi(`paymentLink/${id}`);
+  async getPaymentLink(externalId: string): Promise<PaymentLink> {
+    return this.callApi(this.url(externalId, false));
   }
 
   async createPaymentLink(externalId?: string): Promise<PaymentLink> {
@@ -43,13 +39,13 @@ export class Api {
     return this.callApi('paymentLink', 'POST', dto);
   }
 
-  async updatePaymentLink(id: number, status: PaymentLinkStatus): Promise<PaymentLink> {
+  async updatePaymentLink(externalId: string, status: PaymentLinkStatus): Promise<PaymentLink> {
     const dto: UpdatePaymentLink = { status };
-    return this.callApi(`paymentLink/${id}`, 'PUT', dto);
+    return this.callApi(this.url(externalId, false), 'PUT', dto);
   }
 
   async createPayment(
-    id: number,
+    linkExternalId: string,
     amount: number,
     currency: string,
     externalId?: string,
@@ -63,11 +59,11 @@ export class Api {
       expiryDate,
       mode,
     };
-    return this.callApi(`paymentLink/${id}/payment`, 'POST', dto);
+    return this.callApi(this.url(linkExternalId, true), 'POST', dto);
   }
 
-  async cancelPayment(id: number): Promise<PaymentLink> {
-    return this.callApi(`paymentLink/${id}/payment`, 'DELETE');
+  async cancelPayment(linkExternalId: string): Promise<PaymentLink> {
+    return this.callApi(this.url(linkExternalId, true), 'DELETE');
   }
 
   // --- OTHER --- //
@@ -85,6 +81,10 @@ export class Api {
   }
 
   // --- HELPER METHODS --- //
+  private url(externalId: string, isPayment: boolean): string {
+    return `paymentLink${isPayment ? '/payment' : ''}?externalId=${externalId}`;
+  }
+
   private apiUrl(version = Config.api.version): string {
     return `${Config.api.url}/${version}`;
   }

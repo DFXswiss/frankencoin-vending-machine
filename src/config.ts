@@ -16,6 +16,11 @@ class ConfigClass {
     address: process.env.API_ADDRESS,
     signature: process.env.API_SIGNATURE,
   };
+
+  mdb = {
+    path: process.env.MDB_PATH,
+    baudRate: process.env.MDB_BAUD_RATE,
+  };
 }
 
 config();

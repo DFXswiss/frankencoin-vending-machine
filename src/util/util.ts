@@ -6,10 +6,6 @@ type KeyType<T, U> = {
 }[keyof T];
 
 export class Util {
-  static sleep(seconds: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
-  }
-
   static poll<T>(
     action: () => Promise<T | undefined>,
     verify: (result: T | undefined) => boolean,
@@ -63,6 +59,21 @@ export class Util {
 
       throw e;
     }
+  }
+
+  // --- TIME UTIL --- //
+  static sleep(seconds: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+  }
+
+  static minutesAfter(minutes: number, from?: Date): Date {
+    const date = from ? new Date(from) : new Date();
+    date.setMinutes(date.getMinutes() + minutes);
+    return date;
+  }
+
+  static minutesBefore(minutes: number, from?: Date): Date {
+    return this.minutesAfter(-minutes, from);
   }
 
   // --- MATH UTIL --- //
