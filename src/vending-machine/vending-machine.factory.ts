@@ -1,4 +1,5 @@
 import { Adapter } from './adapter.interface';
+import { AbrantixRpiAdapter } from './implementations/abrantix-rpi.adapter';
 import { DummyAdapter } from './implementations/dummy.adapter';
 import { MdbLevel2 } from './implementations/mdb-level2';
 import { QibixxUsbAdapter } from './implementations/qibixx-usb.adapter';
@@ -33,6 +34,9 @@ export class VendingMachineFactory {
 
       case AdapterType.QIBIXX_USB:
         return new QibixxUsbAdapter();
+
+      case AdapterType.ABRANTIX_RPI:
+        return new AbrantixRpiAdapter();
     }
 
     throw new Error(`Invalid adapter type ${adapter}`);
