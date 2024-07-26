@@ -1,9 +1,11 @@
-import { DummyMachine } from './implementations/dummy-machine';
+import { Adapter } from './adapter.interface';
+import { DummyAdapter } from './implementations/dummy.adapter';
 import { MdbLevel2 } from './implementations/mdb-level2';
-import { VendingMachine } from './vending-machine';
+import { QibixxUsbAdapter } from './implementations/qibixx-usb.adapter';
+import { VendingMachine } from './vending-machine.interface';
 
 export enum BusType {
-  MDB_LEVEL_2 = 'MdbLevel2',
+  MDB_LEVEL_2 = 'MDB_Level_2',
 }
 
 export enum AdapterType {
@@ -13,20 +15,26 @@ export enum AdapterType {
 }
 
 export class VendingMachineFactory {
-  static create(bus: BusType, adapter: AdapterType): VendingMachine {
-    switch (bus) {
-      case BusType.MDB_LEVEL_2: {
-        switch (adapter) {
-          case AdapterType.DUMMY:
-            return new DummyMachine();
+  static create(busType: BusType, adapterType: AdapterType): VendingMachine {
+    const adapter = this.createAdapter(adapterType);
 
-          case AdapterType.QIBIXX_USB:
-            return new MdbLevel2();
-        }
-        break;
-      }
+    switch (busType) {
+      case BusType.MDB_LEVEL_2:
+        return new MdbLevel2(adapter);
     }
 
-    throw new Error(`Invalid machine type ${adapter}`);
+    throw new Error(`Invalid buy type ${busType}`);
+  }
+
+  private static createAdapter(adapter: AdapterType): Adapter {
+    switch (adapter) {
+      case AdapterType.DUMMY:
+        return new DummyAdapter();
+
+      case AdapterType.QIBIXX_USB:
+        return new QibixxUsbAdapter();
+    }
+
+    throw new Error(`Invalid adapter type ${adapter}`);
   }
 }

@@ -5,8 +5,8 @@ import Config from './config';
 import { Logger } from './util/logger';
 import { Util } from './util/util';
 import { Message, MessageType, ProductMessage } from './vending-machine/message.dto';
-import { VendingMachine } from './vending-machine/vending-machine';
 import { VendingMachineFactory } from './vending-machine/vending-machine.factory';
+import { VendingMachine } from './vending-machine/vending-machine.interface';
 
 class App {
   private readonly logger: Logger;
@@ -30,15 +30,13 @@ class App {
     this.machine.onMessage.subscribe(async (msg: Message) => {
       try {
         switch (msg.type) {
-          case MessageType.PRODUCT: {
+          case MessageType.PRODUCT:
             await this.onProduct(msg);
             break;
-          }
 
-          case MessageType.ERROR: {
+          case MessageType.ERROR:
             this.logger.error(`Received error from machine: ${msg.payload}`);
             break;
-          }
         }
       } catch (e) {
         this.logger.error('Failed to handle message:', e);

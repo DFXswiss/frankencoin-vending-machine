@@ -1,47 +1,33 @@
 import { Observable, Subject } from 'rxjs';
-import { ReadlineParser, SerialPort } from 'serialport';
-import Config from '../../config';
-import { Logger } from '../../util/logger';
 import { Util } from '../../util/util';
+import { Adapter } from '../adapter.interface';
 import { Message, MessageType } from '../message.dto';
-import { VendingMachine } from '../vending-machine';
+import { VendingMachine } from '../vending-machine.interface';
 
 export class MdbLevel2 implements VendingMachine {
-  private readonly logger: Logger;
-
-  private readonly port: SerialPort;
-  private readonly parser: ReadlineParser;
-
   private readonly $message = new Subject<Message>();
 
-  constructor() {
-    if (!Config.mdb.path || !Config.mdb.baudRate) throw new Error('Invalid MDB settings');
-
-    this.logger = new Logger('MdbLevel2');
-
-    this.port = new SerialPort({ path: Config.mdb.path, baudRate: +Config.mdb.baudRate });
-    this.parser = new ReadlineParser();
-    this.port.pipe(this.parser);
-    this.parser.on('data', (d) => this.onRead(d));
+  constructor(private readonly adapter: Adapter) {
+    adapter.onRead((d) => this.onRead(d));
   }
 
   // --- PUBLIC API --- //
   readonly onMessage: Observable<Message> = this.$message.asObservable();
 
   async enable(): Promise<void> {
-    await this.onWrite('1');
+    this.adapter.onWrite('1');
   }
 
   async disable(): Promise<void> {
-    await this.onWrite('0');
+    this.adapter.onWrite('0');
   }
 
   async acceptVend(price: number): Promise<void> {
-    await this.onWrite(`VEND,${price}`);
+    this.adapter.onWrite(`VEND,${price}`);
   }
 
   async stopVend(): Promise<void> {
-    await this.onWrite(`STOP`);
+    this.adapter.onWrite(`STOP`);
 
     await this.onEnable();
   }
@@ -54,25 +40,16 @@ export class MdbLevel2 implements VendingMachine {
   }
 
   private async setCredit(credit: number): Promise<void> {
-    await this.onWrite(`START,${credit}`);
+    this.adapter.onWrite(`START,${credit}`);
   }
 
   // --- HELPER METHODS --- //
-  private async onWrite(data: string): Promise<boolean> {
-    return this.port.write(`C,${data}\n`);
-  }
-
-  private async onRead(data: string) {
-    this.logger.debug(data);
-
-    const [sender, message, ...payload] = data.replace('\r', '').split(',');
-    if (sender !== 'c') return;
-
-    if (message.includes('0')) {
-      await this.enable();
-    }
-
+  private async onRead([message, ...payload]: string[]) {
     switch (message) {
+      case '0': {
+        await this.enable();
+      }
+
       case 'STATUS': {
         switch (payload[0]) {
           case 'ENABLED': {
