@@ -1,36 +1,14 @@
 import { Observable, Subject } from 'rxjs';
 import { ReadlineParser, SerialPort } from 'serialport';
-import Config from '../config';
-import { Util } from '../util/util';
+import Config from '../../config';
+import { Logger } from '../../util/logger';
+import { Util } from '../../util/util';
+import { Message, MessageType } from '../message.dto';
+import { VendingMachine } from '../vending-machine';
 
-export enum MessageType {
-  ENABLED = 'Enabled',
-  PRODUCT = 'Product',
-  ERROR = 'Error',
-}
+export class MdbLevel2 implements VendingMachine {
+  private readonly logger: Logger;
 
-export interface ProductPayload {
-  product: number;
-  price: number;
-}
-
-export interface EnabledMessage {
-  type: MessageType.ENABLED;
-}
-
-export interface ProductMessage {
-  type: MessageType.PRODUCT;
-  payload: ProductPayload;
-}
-
-export interface ErrorMessage {
-  type: MessageType.ERROR;
-  payload: string;
-}
-
-export type Message = EnabledMessage | ProductMessage | ErrorMessage;
-
-export class VendingMachine {
   private readonly port: SerialPort;
   private readonly parser: ReadlineParser;
 
@@ -38,7 +16,8 @@ export class VendingMachine {
 
   constructor() {
     if (!Config.mdb.path || !Config.mdb.baudRate) throw new Error('Invalid MDB settings');
-    console.log(Config.mdb.path, Config.mdb.baudRate);
+
+    this.logger = new Logger('MdbLevel2');
 
     this.port = new SerialPort({ path: Config.mdb.path, baudRate: +Config.mdb.baudRate });
     this.parser = new ReadlineParser();
@@ -46,6 +25,7 @@ export class VendingMachine {
     this.parser.on('data', (d) => this.onRead(d));
   }
 
+  // --- PUBLIC API --- //
   readonly onMessage: Observable<Message> = this.$message.asObservable();
 
   async enable(): Promise<void> {
@@ -56,18 +36,25 @@ export class VendingMachine {
     await this.onWrite('0');
   }
 
-  async setCredit(credit: number): Promise<void> {
-    await this.onWrite(`START,${credit}`);
-  }
-
   async acceptVend(price: number): Promise<void> {
     await this.onWrite(`VEND,${price}`);
   }
 
-  async stopVending(): Promise<void> {
-    await this.onWrite(`STOP`); //Guthaben zurückerstatten
-    Util.sleep(1);
-    this.setCredit(10);//Guthaben von allfälliger Zahlung gutschreiben
+  async stopVend(): Promise<void> {
+    await this.onWrite(`STOP`);
+
+    await this.onEnable();
+  }
+
+  // --- PRIVATE API --- //
+
+  private async onEnable() {
+    await Util.sleep(2);
+    await this.setCredit(10);
+  }
+
+  private async setCredit(credit: number): Promise<void> {
+    await this.onWrite(`START,${credit}`);
   }
 
   // --- HELPER METHODS --- //
@@ -76,7 +63,8 @@ export class VendingMachine {
   }
 
   private async onRead(data: string) {
-    console.log(data);
+    this.logger.debug(data);
+
     const [sender, message, ...payload] = data.replace('\r', '').split(',');
     if (sender !== 'c') return;
 
@@ -86,36 +74,31 @@ export class VendingMachine {
 
     switch (message) {
       case 'STATUS': {
-
         switch (payload[0]) {
           case 'ENABLED': {
-            this.$message.next({ type: MessageType.ENABLED });
+            await this.onEnable();
             break;
           }
+
           case 'VEND': {
             const [_, amount, productNr] = payload;
             this.$message.next({ type: MessageType.PRODUCT, payload: { product: +productNr, price: +amount } });
             break;
           }
-          default:
-            //Do nothing
-            break;
         }
         break;
       }
-      // TODO: vend cancel/expire?
 
       case 'ERR': {
         if (payload[0].includes('cashless is on')) {
-          this.$message.next({ type: MessageType.ENABLED });
+          await this.onEnable();
         } else if (payload[0].includes('START')) {
-          await this.disable() //Neustart
-        } else this.$message.next({ type: MessageType.ERROR, payload: payload.join(',') });
+          await this.disable(); // restart
+        } else {
+          this.$message.next({ type: MessageType.ERROR, payload: payload.join(',') });
+        }
         break;
       }
-
     }
   }
 }
-
-

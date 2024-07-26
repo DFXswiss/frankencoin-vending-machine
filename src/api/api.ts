@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig, Method } from 'axios';
 import { jwtDecode } from 'jwt-decode';
-import Config from '../../config';
-import { Util } from '../../util/util';
+import Config from '../config';
+import { Util } from '../util/util';
 import {
   CreatePaymentLink,
   CreatePaymentLinkPayment,

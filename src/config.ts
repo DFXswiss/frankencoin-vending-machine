@@ -1,17 +1,20 @@
 import { config } from 'dotenv';
 import { hostname } from 'os';
+import { AdapterType, BusType } from './vending-machine/vending-machine.factory';
 
 class ConfigClass {
   deviceId = hostname();
   pos = {
     name: process.env.POS_NAME ?? 'default',
+    bus: (process.env.POS_BUS ?? BusType.MDB_LEVEL_2) as BusType,
+    adapter: (process.env.POS_ADAPTER ?? AdapterType.DUMMY) as AdapterType,
     timeout: +(process.env.POS_TIMEOUT_S ?? 60),
     currency: process.env.POS_CURRENCY ?? 'CHF',
   };
 
   logger = {
     printConsole: true,
-    printFile: true,
+    printFile: false,
     filePath: process.env.LOG_FILE_PATH ?? 'vending-machine.log',
   };
 
