@@ -36,7 +36,7 @@ export class MdbLevel2 implements VendingMachine {
 
   private async onEnable() {
     await Util.sleep(2);
-    await this.setCredit(10);
+    await this.setCredit(10); // Todo: process.env.POS_CREDIT verwenden
   }
 
   private async setCredit(credit: number): Promise<void> {
@@ -71,10 +71,20 @@ export class MdbLevel2 implements VendingMachine {
           await this.onEnable();
         } else if (payload[0].includes('START')) {
           await this.disable(); // restart
+        } else if (payload[0].includes('VEND 1') || payload[0].includes('VEND 3')) {
+          //await this.setCredit(msg.payload.price); //Todo: Guthaben zurückerstatten oder neu vergeben
         } else {
           this.$message.next({ type: MessageType.ERROR, payload: payload.join(',') });
         }
         break;
+      }
+
+      case 'SALE': { //vend products over an other device
+        console.log('Verkauf über Münzzähler getätigt'); // Todo: globaler Verkaufszähler implementieren
+      }
+
+      case 'SUCCESS': { //vending successful
+        // Todo: globaler Verkaufszähler implementieren, the same as one on top
       }
     }
   }
