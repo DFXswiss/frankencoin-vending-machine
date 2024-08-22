@@ -70,9 +70,7 @@ class App {
 
     // poll the payment
     while (payment?.status === PaymentLinkPaymentStatus.PENDING && payment.id === paymentId) {
-      await Util.sleep(1);
-
-      ({ payment } = await this.api.getPaymentLink(this.linkId));
+      ({ payment } = await this.api.waitForPayment(this.linkId));
     }
 
     if (payment?.id === paymentId) {

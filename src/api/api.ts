@@ -5,7 +5,6 @@ import { Util } from '../util/util';
 import {
   CreatePaymentLink,
   CreatePaymentLinkPayment,
-  Fiat,
   PaymentLink,
   PaymentLinkPaymentMode,
   PaymentLinkStatus,
@@ -22,8 +21,6 @@ export class Api {
   private accessToken?: string;
   private expires?: Date;
 
-  private fiats?: Fiat[];
-
   constructor() {
     if (!Config.api.address || !Config.api.signature) throw new Error('Invalid API credentials');
     this.authenticationInfo = { address: Config.api.address, signature: Config.api.signature };
@@ -31,7 +28,7 @@ export class Api {
 
   // --- PAYMENT LINKS --- //
   async getPaymentLink(externalId: string): Promise<PaymentLink> {
-    return this.callApi(this.url(externalId, false));
+    return this.callApi(this.url(externalId));
   }
 
   async createPaymentLink(externalId?: string): Promise<PaymentLink> {
@@ -41,7 +38,7 @@ export class Api {
 
   async updatePaymentLink(externalId: string, status: PaymentLinkStatus): Promise<PaymentLink> {
     const dto: UpdatePaymentLink = { status };
-    return this.callApi(this.url(externalId, false), 'PUT', dto);
+    return this.callApi(this.url(externalId), 'PUT', dto);
   }
 
   async createPayment(
@@ -54,35 +51,25 @@ export class Api {
   ): Promise<PaymentLink> {
     const dto: CreatePaymentLinkPayment = {
       amount,
-      currency: await this.getFiat(currency),
+      currency,
       externalId,
       expiryDate,
       mode,
     };
-    return this.callApi(this.url(linkExternalId, true), 'POST', dto);
+    return this.callApi(this.url(linkExternalId, 'payment'), 'POST', dto);
   }
 
   async cancelPayment(linkExternalId: string): Promise<PaymentLink> {
-    return this.callApi(this.url(linkExternalId, true), 'DELETE');
+    return this.callApi(this.url(linkExternalId, 'payment'), 'DELETE');
   }
 
-  // --- OTHER --- //
-
-  async getFiats(): Promise<Fiat[]> {
-    return (this.fiats ??= await this.callApi('fiat'));
-  }
-
-  async getFiat(currency: string): Promise<Fiat> {
-    const fiats = await this.getFiats();
-    const fiat = fiats.find((f) => f.name === currency);
-    if (!fiat) throw new Error(`Invalid currency ${currency}`);
-
-    return fiat;
+  async waitForPayment(linkExternalId: string): Promise<PaymentLink> {
+    return this.callApi(this.url(linkExternalId, 'payment/wait'), 'GET');
   }
 
   // --- HELPER METHODS --- //
-  private url(externalId: string, isPayment: boolean): string {
-    return `paymentLink${isPayment ? '/payment' : ''}?externalId=${externalId}`;
+  private url(externalId: string, path?: string): string {
+    return `paymentLink${path ? '/' + path : ''}?externalId=${externalId}`;
   }
 
   private apiUrl(version = Config.api.version): string {

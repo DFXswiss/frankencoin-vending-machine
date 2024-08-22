@@ -1,14 +1,3 @@
-export interface Fiat {
-  id: number;
-  name: string;
-  buyable: boolean;
-  sellable: boolean;
-  cardBuyable: boolean;
-  cardSellable: boolean;
-  instantBuyable: boolean;
-  instantSellable: boolean;
-}
-
 export enum PaymentLinkStatus {
   ACTIVE = 'Active',
   INACTIVE = 'Inactive',
@@ -31,7 +20,7 @@ export interface PaymentLinkPayment {
   externalId?: string;
   status: PaymentLinkPaymentStatus;
   amount: number;
-  currency: Fiat;
+  currency: string;
   mode: PaymentLinkPaymentMode;
   expiryDate: Date;
   url: string;
@@ -56,7 +45,7 @@ export interface CreatePaymentLinkPayment {
   mode: PaymentLinkPaymentMode;
   amount: number;
   externalId?: string;
-  currency: Fiat;
+  currency: string;
   expiryDate?: Date;
 }
 
