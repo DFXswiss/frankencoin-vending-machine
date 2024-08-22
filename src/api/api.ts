@@ -8,6 +8,7 @@ import {
   PaymentLink,
   PaymentLinkPaymentMode,
   PaymentLinkStatus,
+  PaymentRecipient,
   UpdatePaymentLink,
 } from './dto';
 
@@ -31,13 +32,17 @@ export class Api {
     return this.callApi(this.url(externalId));
   }
 
-  async createPaymentLink(externalId?: string): Promise<PaymentLink> {
-    const dto: CreatePaymentLink = { externalId };
+  async createPaymentLink(externalId?: string, recipient?: PaymentRecipient): Promise<PaymentLink> {
+    const dto: CreatePaymentLink = { externalId, recipient };
     return this.callApi('paymentLink', 'POST', dto);
   }
 
-  async updatePaymentLink(externalId: string, status: PaymentLinkStatus): Promise<PaymentLink> {
-    const dto: UpdatePaymentLink = { status };
+  async updatePaymentLink(
+    externalId: string,
+    status?: PaymentLinkStatus,
+    recipient?: PaymentRecipient,
+  ): Promise<PaymentLink> {
+    const dto: UpdatePaymentLink = { status, recipient };
     return this.callApi(this.url(externalId), 'PUT', dto);
   }
 

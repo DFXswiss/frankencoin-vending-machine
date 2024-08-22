@@ -38,7 +38,9 @@ export interface PaymentLink {
 }
 
 export interface UpdatePaymentLink {
-  status: PaymentLinkStatus;
+  status?: PaymentLinkStatus;
+  webhookUrl?: string;
+  recipient?: PaymentRecipient;
 }
 
 export interface CreatePaymentLinkPayment {
@@ -48,8 +50,23 @@ export interface CreatePaymentLinkPayment {
   currency: string;
   expiryDate?: Date;
 }
+export interface PaymentRecipient {
+  name?: string;
+  address?: {
+    street?: string;
+    houseNumber?: string;
+    zip?: string;
+    city?: string;
+    country?: string;
+  };
+  phone?: string;
+  mail?: string;
+  website?: string;
+}
 
 export interface CreatePaymentLink {
   externalId?: string;
+  webhookUrl?: string;
+  recipient?: PaymentRecipient;
   payment?: CreatePaymentLinkPayment;
 }
