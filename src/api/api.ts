@@ -74,7 +74,7 @@ export class Api {
 
   // --- HELPER METHODS --- //
   private url(externalId: string, path?: string): string {
-    return `paymentLink${path ? '/' + path : ''}?externalId=${externalId}`;
+    return `paymentLink${path ? '/' + path : ''}?externalLinkId=${externalId}`;
   }
 
   private apiUrl(version = Config.api.version): string {
