@@ -15,7 +15,7 @@ class ConfigClass {
 
   logger = {
     printConsole: true,
-    printFile: false,
+    printFile: true,
     filePath: process.env.LOG_FILE_PATH ?? 'vending-machine.log',
   };
 

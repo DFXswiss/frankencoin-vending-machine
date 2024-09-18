@@ -31,6 +31,7 @@ class App {
       try {
         switch (msg.type) {
           case MessageType.PRODUCT:
+            this.logger.debug(`Received product from machine: ${msg.payload.product}`);
             await this.onProduct(msg);
             break;
 
@@ -79,10 +80,12 @@ class App {
       switch (payment.status) {
         case PaymentLinkPaymentStatus.COMPLETED:
           await this.machine.acceptVend(msg.payload.price);
+          this.logger.debug(`Payment ${paymentId} completed`);
           break;
 
         case PaymentLinkPaymentStatus.EXPIRED:
-          // await this.machine.stopVend();
+          await this.machine.stopVend();
+          this.logger.debug(`Payment ${paymentId} expired`);
           break;
       }
     }
