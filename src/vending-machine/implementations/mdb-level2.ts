@@ -1,4 +1,5 @@
 import { Observable, Subject } from 'rxjs';
+import Config from '../../config';
 import { Util } from '../../util/util';
 import { Adapter } from '../adapter.interface';
 import { Message, MessageType } from '../message.dto';
@@ -36,7 +37,7 @@ export class MdbLevel2 implements VendingMachine {
 
   private async onEnable() {
     await Util.sleep(2);
-    await this.setCredit(10); // Todo: process.env.POS_CREDIT verwenden
+    await this.setCredit(Config.pos.credit);
   }
 
   private async setCredit(credit: number): Promise<void> {

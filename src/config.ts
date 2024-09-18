@@ -10,6 +10,7 @@ class ConfigClass {
     adapter: (process.env.POS_ADAPTER ?? AdapterType.DUMMY) as AdapterType,
     timeout: +(process.env.POS_TIMEOUT_S ?? 60),
     currency: process.env.POS_CURRENCY ?? 'CHF',
+    credit: +(process.env.POS_CREDIT ?? 999),
   };
 
   logger = {

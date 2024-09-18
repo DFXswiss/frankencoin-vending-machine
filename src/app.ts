@@ -82,7 +82,7 @@ class App {
           break;
 
         case PaymentLinkPaymentStatus.EXPIRED:
-          await this.machine.stopVend();
+          // await this.machine.stopVend();
           break;
       }
     }
