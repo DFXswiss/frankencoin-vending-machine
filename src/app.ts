@@ -49,7 +49,8 @@ class App {
 
     // wait forever
     for (;;) {
-      await Util.sleep(1);
+      await Util.sleep(5);
+      await this.machine.refreshCredit();
     }
   }
 

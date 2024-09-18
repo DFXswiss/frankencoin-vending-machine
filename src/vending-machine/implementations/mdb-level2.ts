@@ -40,6 +40,10 @@ export class MdbLevel2 implements VendingMachine {
     await this.onEnable();
   }
 
+  async refreshCredit(): Promise<void> {
+    await this.setCredit(Config.pos.credit);
+  }
+
   // --- PRIVATE API --- //
 
   private async onEnable() {

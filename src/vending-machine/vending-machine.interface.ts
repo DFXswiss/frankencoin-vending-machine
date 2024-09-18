@@ -7,6 +7,8 @@ export interface VendingMachine {
   enable(): Promise<void>;
   disable(): Promise<void>;
 
+  refreshCredit(): Promise<void>;
+
   acceptVend(price: number): Promise<void>;
   stopVend(): Promise<void>;
 }
