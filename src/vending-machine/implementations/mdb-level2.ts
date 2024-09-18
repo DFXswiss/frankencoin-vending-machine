@@ -82,10 +82,11 @@ export class MdbLevel2 implements VendingMachine {
       case 'ERR': {
         if (payload[0].includes('cashless is on')) {
           await this.onEnable();
+        } else if (payload[0].includes('START') || payload[0].includes('VEND 5')) {
+          await this.disable(); // restart
         } else if (payload[0].includes('VEND 1') || payload[0].includes('VEND 3')) {
           await this.onEnable();
         } else {
-          await this.disable(); // restart
           this.$message.next({ type: MessageType.ERROR, payload: payload.join(',') });
         }
         break;
