@@ -11,7 +11,7 @@ export enum LogLevel {
 export class Logger {
   constructor(
     private readonly name: string,
-    private readonly level = LogLevel.INFO,
+    private readonly level = LogLevel.DEBUG,
   ) {}
 
   debug(message: string, payload?: unknown): void {
