@@ -57,11 +57,13 @@ class App {
       // ignore error
     });
 
+    const date = new Date().toISOString().split('.')[0].split(':').join('').split('-').join('').split('T').join('-');
+    const id = `${msg.payload.product}-${date}`;
     let { payment } = await this.api.createPayment(
       this.linkId,
       msg.payload.price,
       Config.pos.currency,
-      undefined,
+      id,
       Util.secondsAfter(Config.pos.timeout),
     );
     if (!payment) return;
