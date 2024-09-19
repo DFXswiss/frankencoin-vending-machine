@@ -15,6 +15,8 @@ class App {
 
   private readonly linkId = Config.pos.name;
 
+  private pendingVend = false;
+
   constructor() {
     this.logger = new Logger('Vending Machine');
     this.api = new Api();
@@ -49,12 +51,14 @@ class App {
 
     // wait forever
     for (;;) {
-      await Util.sleep(1);
-      // await this.machine.refreshCredit();
+      await Util.sleep(5 * 60);
+      if (!this.pendingVend) await this.machine.refreshCredit();
     }
   }
 
   private async onProduct(msg: ProductMessage) {
+    this.pendingVend = true;
+
     await this.api.cancelPayment(this.linkId).catch(() => {
       // ignore error
     });
@@ -89,6 +93,8 @@ class App {
           this.logger.debug(`Payment ${paymentId} expired`);
           break;
       }
+
+      this.pendingVend = false;
     }
   }
 }
