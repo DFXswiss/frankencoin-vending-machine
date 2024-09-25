@@ -37,6 +37,11 @@ class App {
             await this.onProduct(msg);
             break;
 
+          case MessageType.CANCEL:
+            this.logger.debug(`Received cancel from machine`);
+            await this.onCancel();
+            break;
+
           case MessageType.ERROR:
             this.logger.error(`Received error from machine: ${msg.payload}`);
             break;
@@ -88,14 +93,21 @@ class App {
           this.logger.debug(`Payment ${paymentId} completed`);
           break;
 
+        case PaymentLinkPaymentStatus.CANCELLED:
         case PaymentLinkPaymentStatus.EXPIRED:
           await this.machine.stopVend();
-          this.logger.debug(`Payment ${paymentId} expired`);
+          this.logger.debug(`Payment ${paymentId} cancelled/expired`);
           break;
       }
 
       this.pendingVend = false;
     }
+  }
+
+  private async onCancel() {
+    await this.api.cancelPayment(this.linkId).catch(() => {
+      // ignore error
+    });
   }
 }
 

@@ -1,5 +1,6 @@
 export enum MessageType {
   PRODUCT = 'Product',
+  CANCEL = 'Cancel',
   ERROR = 'Error',
 }
 
@@ -13,9 +14,13 @@ export interface ProductMessage {
   payload: ProductPayload;
 }
 
+export interface CancelMessage {
+  type: MessageType.CANCEL;
+}
+
 export interface ErrorMessage {
   type: MessageType.ERROR;
   payload: string;
 }
 
-export type Message = ProductMessage | ErrorMessage;
+export type Message = ProductMessage | CancelMessage | ErrorMessage;

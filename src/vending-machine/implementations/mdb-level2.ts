@@ -1,3 +1,4 @@
+import { Gpio } from 'pigpio';
 import { Observable, Subject } from 'rxjs';
 import Config from '../../config';
 import { Logger } from '../../util/logger';
@@ -9,9 +10,19 @@ import { VendingMachine } from '../vending-machine.interface';
 export class MdbLevel2 implements VendingMachine {
   private readonly logger: Logger;
   private readonly $message = new Subject<Message>();
+  private readonly cancelButton: Gpio;
 
   constructor(private readonly adapter: Adapter) {
     this.logger = new Logger('MDB Level 2');
+
+    this.cancelButton = new Gpio(2, {
+      mode: Gpio.INPUT,
+      pullUpDown: Gpio.PUD_UP,
+      alert: true,
+    });
+    this.cancelButton.glitchFilter(10000);
+    this.cancelButton.on('alert', (level) => level === 0 && this.$message.next({ type: MessageType.CANCEL }));
+
     adapter.onRead((d) => this.onRead(d));
   }
 
