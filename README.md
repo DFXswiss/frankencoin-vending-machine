@@ -1,3 +1,13 @@
 # FrankencoinPay Vending Machine
 
 FrankencoinPay POS code for MDB vending machines
+
+## Hardware Setup (on Raspberry Pi)
+
+1. Install Raspberry Pi OS lite (32-bit)
+   - Enable SSH and Wifi
+   - Configure username/password
+1. Install Node.js and git
+1. Clone this git repo and download dist (from workflow)
+1. Install npm packages
+1. Enable serial port (raspi-config)

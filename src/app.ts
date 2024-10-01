@@ -106,7 +106,9 @@ class App {
 
   private async onCancel() {
     await this.api.cancelPayment(this.linkId).catch(() => {
-      // ignore error
+      // cancel failed -> just stop
+      this.logger.debug(`Stop vend`);
+      return this.machine.stopVend();
     });
   }
 }
