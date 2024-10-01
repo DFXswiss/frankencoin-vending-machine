@@ -11,3 +11,8 @@ FrankencoinPay POS code for MDB vending machines
 1. Clone this git repo and download dist (from workflow)
 1. Install npm packages
 1. Enable serial port (raspi-config)
+1. Setup pm2
+   - `sudo npm install -g pm2`
+   - `sudo pm2 startup`
+   - `sudo pm2 start dist/src/app.js`
+   - `sudo pm2 save`
