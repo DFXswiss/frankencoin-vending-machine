@@ -7,8 +7,8 @@ FrankencoinPay POS code for MDB vending machines
 1. Install Raspberry Pi OS lite (32-bit)
    - Enable SSH and Wifi
    - Configure username/password
-1. Install Node.js and git
-1. Clone this git repo and download dist (from workflow)
+1. Install Node.js
+1. Download this git repo and dist code (from workflow)
 1. Install npm packages
 1. Enable serial port (raspi-config)
 1. Setup pm2
