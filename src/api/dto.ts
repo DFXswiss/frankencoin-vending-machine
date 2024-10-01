@@ -65,6 +65,7 @@ export interface PaymentRecipient {
 }
 
 export interface CreatePaymentLink {
+  route?: string;
   externalId?: string;
   webhookUrl?: string;
   recipient?: PaymentRecipient;

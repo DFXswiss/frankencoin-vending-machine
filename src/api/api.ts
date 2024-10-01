@@ -32,8 +32,8 @@ export class Api {
     return this.callApi(this.url(externalId));
   }
 
-  async createPaymentLink(externalId?: string, recipient?: PaymentRecipient): Promise<PaymentLink> {
-    const dto: CreatePaymentLink = { externalId, recipient };
+  async createPaymentLink(route?: string, externalId?: string, recipient?: PaymentRecipient): Promise<PaymentLink> {
+    const dto: CreatePaymentLink = { route, externalId, recipient };
     return this.callApi('paymentLink', 'POST', dto);
   }
 

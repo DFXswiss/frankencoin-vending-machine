@@ -1,5 +1,6 @@
 import { config } from 'dotenv';
 import { hostname } from 'os';
+import { LogLevel } from './util/logger';
 import { AdapterType, BusType } from './vending-machine/vending-machine.factory';
 
 class ConfigClass {
@@ -14,6 +15,7 @@ class ConfigClass {
   };
 
   logger = {
+    level: LogLevel.DEBUG,
     printConsole: true,
     printFile: true,
     filePath: process.env.LOG_FILE_PATH ?? 'vending-machine.log',
@@ -24,6 +26,7 @@ class ConfigClass {
     version: process.env.API_VERSION,
     address: process.env.API_ADDRESS,
     signature: process.env.API_SIGNATURE,
+    route: process.env.API_ROUTE,
   };
 
   mdb = {

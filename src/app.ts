@@ -26,7 +26,7 @@ class App {
   async run() {
     // create the link
     const link = await this.api.getPaymentLink(this.linkId).catch(() => undefined);
-    if (!link) await this.api.createPaymentLink(this.linkId);
+    if (!link) await this.api.createPaymentLink(Config.api.route, this.linkId);
 
     // listen to messages
     this.machine.onMessage.subscribe(async (msg: Message) => {
